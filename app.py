@@ -1548,6 +1548,8 @@ def create_admin():
             db.session.commit()
             print("✅ Admin created: username=admin, password=admin123")
 
+# Database create karo module load hote hi (gunicorn ke liye zaroori)
+create_admin()
+
 if __name__ == '__main__':
-    create_admin()
     app.run(debug=True)

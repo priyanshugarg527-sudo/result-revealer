@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="page-title"><i class="fas fa-layer-group me-2"></i>All Semesters Overview</h2>
+    <p class="text-muted">Student and subject count per semester</p>
+</div>
+
+<div class="row g-4">
+    {% for item in sem_data %}
+    <div class="col-md-3">
+        <a href="{{ url_for('manage_students', sem=item.sem) }}" class="text-decoration-none">
+            <div class="sem-overview-card">
+                <div class="sem-number">Sem {{ item.sem }}</div>
+                <div class="sem-stats">
+                    <div class="sem-stat-item">
+                        <i class="fas fa-users text-primary"></i>
+                        <span>{{ item.students }} Students</span>
+                    </div>
+                    <div class="sem-stat-item">
+                        <i class="fas fa-book text-success"></i>
+                        <span>{{ item.subjects }} Subjects</span>
+                    </div>
+                </div>
+                <div class="sem-action">View Students →</div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-back mt-4">
+    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+</a>
+{% endblock %}

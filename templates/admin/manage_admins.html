@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>👑 Manage Admins</h3>
+    <a href="{{ url_for('add_admin') }}" class="btn btn-success">+ Add New Admin</a>
+</div>
+<table class="table table-bordered table-hover shadow-sm">
+    <thead class="table-danger">
+        <tr>
+            <th>#</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for admin in admins %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ admin.username }}</td>
+            <td><span class="badge bg-danger">Admin</span></td>
+            <td>
+                {% if admin.id != current_user.id %}
+                <form method="POST" action="{{ url_for('delete_admin', admin_id=admin.id) }}"
+                      onsubmit="return confirm('Are you sure you want to delete this admin?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                </form>
+                {% else %}
+                <span class="badge bg-secondary">You</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-2">← Back to Dashboard</a>
+{% endblock %}

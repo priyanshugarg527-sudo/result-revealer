@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="page-title"><i class="fas fa-history me-2"></i>PDF Download History</h2>
+    <p class="text-muted">Complete log of all result card downloads</p>
+</div>
+
+<div class="custom-card">
+    {% if downloads %}
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Roll No</th>
+                <th>Semester</th>
+                <th>Downloaded By</th>
+                <th>Role</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in downloads %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td><strong>{{ log.student.name }}</strong></td>
+                <td><span class="roll-badge">{{ log.student.roll_number }}</span></td>
+                <td><span class="sem-badge">Sem {{ log.student.semester }}</span></td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="user-avatar-sm" style="width:28px;height:28px;font-size:12px;">
+                            {{ log.downloaded_by[0].upper() }}
+                        </div>
+                        {{ log.downloaded_by }}
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-{{ 'danger' if log.downloaded_by == 'admin' else 'primary' }}">
+                        {{ 'Admin' if log.downloaded_by == 'admin' else 'Student' }}
+                    </span>
+                </td>
+                <td>
+                    <i class="fas fa-clock me-1 text-muted"></i>
+                    {{ log.downloaded_at.strftime('%d %b %Y, %I:%M %p') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-file-pdf"></i>
+        <p>No downloads yet. Downloads will appear here when students or admins download result cards.</p>
+    </div>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-back mt-4">
+    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+</a>
+{% endblock %}

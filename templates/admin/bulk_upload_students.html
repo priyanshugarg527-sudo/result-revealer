@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5>📊 Bulk Upload Students from Excel</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Excel must have columns: <strong>Name, Roll Number, Username, Password</strong>
+                    <br>
+                    <a href="{{ url_for('download_student_template') }}" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-download me-1"></i>Download Sample Template
+                    </a>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Branch</label>
+                        <select name="branch" class="form-select" required>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}">{{ branch }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Semester</label>
+                        <select name="semester" class="form-select" required>
+                            {% for i in range(1, 9) %}
+                            <option value="{{ i }}">Semester {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Select Excel File (.xlsx)</label>
+                        <input type="file" name="excel_file" class="form-control"
+                               accept=".xlsx,.xls" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-upload me-2"></i>Upload & Add Students
+                    </button>
+                </form>
+            </div>
+        </div>
+        <a href="{{ url_for('manage_students') }}" class="btn btn-secondary mt-3 w-100">← Back</a>
+    </div>
+</div>
+{% endblock %}

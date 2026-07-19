@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header mb-4">
+    <h2 class="page-title"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+    <p class="text-muted">Welcome back, {{ current_user.username }}! Here's your overview.</p>
+</div>
+
+<!-- Clickable Stat Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <a href="{{ url_for('manage_students') }}" class="stat-card stat-blue text-decoration-none">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_students }}</h3>
+                <p>Total Students</p>
+                <small class="stat-hint">Click to manage →</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('all_semesters') }}" class="stat-card stat-green text-decoration-none">
+            <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-info">
+                <h3>8</h3>
+                <p>Semesters</p>
+                <small class="stat-hint">Click to view →</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('active_records') }}" class="stat-card stat-orange text-decoration-none">
+            <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_students }}</h3>
+                <p>Active Records</p>
+                <small class="stat-hint">Click to view →</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('download_history') }}" class="stat-card stat-purple text-decoration-none">
+            <div class="stat-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="stat-info">
+                <h3>{{ recent_downloads|length }}</h3>
+                <p>PDF Downloads</p>
+                <small class="stat-hint">Click for history →</small>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-title mb-3">
+    <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+</div>
+<div class="row g-3 mb-5">
+    <div class="col-md-3">
+        <a href="{{ url_for('manage_students') }}" class="action-card action-green">
+            <i class="fas fa-user-graduate"></i>
+            <span>Manage Students</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('manage_subjects') }}" class="action-card action-blue">
+            <i class="fas fa-book-open"></i>
+            <span>Manage Subjects</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('manage_admins') }}" class="action-card action-red">
+            <i class="fas fa-user-shield"></i>
+            <span>Manage Admins</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('add_student') }}" class="action-card action-orange">
+            <i class="fas fa-user-plus"></i>
+            <span>Add Student</span>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Downloads Preview -->
+<div class="section-title mb-3">
+    <i class="fas fa-history me-2 text-danger"></i>Recent PDF Downloads
+    <a href="{{ url_for('download_history') }}" class="btn btn-sm btn-outline-secondary ms-3">View All</a>
+</div>
+<div class="custom-card mb-5">
+    {% if recent_downloads %}
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Semester</th>
+                <th>Downloaded By</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in recent_downloads %}
+            <tr>
+                <td><strong>{{ log.student.name }}</strong></td>
+                <td><span class="roll-badge">{{ log.student.roll_number }}</span></td>
+                <td><span class="sem-badge">Sem {{ log.student.semester }}</span></td>
+                <td>
+                    <span class="badge bg-{{ 'danger' if log.downloaded_by == 'admin' else 'primary' }}">
+                        {{ log.downloaded_by }}
+                    </span>
+                </td>
+                <td>
+                    <i class="fas fa-clock me-1 text-muted"></i>
+                    {{ log.downloaded_at.strftime('%d %b %Y, %I:%M %p') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state py-4">
+        <i class="fas fa-file-pdf"></i>
+        <p>No PDF downloads yet</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

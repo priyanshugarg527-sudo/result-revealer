@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5>📊 Bulk Upload Subjects from Excel</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Excel must have columns: <strong>Name, Semester, Credits</strong>, and either
+                    <strong>ESE_Max + CFA_Max</strong> (regular subject) or
+                    <strong>Is_Single_Mark = Yes + Single_Max</strong> (project/seminar subject)
+                    <br>
+                    <a href="{{ url_for('download_subject_template') }}" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-download me-1"></i>Download Sample Template
+                    </a>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Branch</label>
+                        <select name="branch" class="form-select" required>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}">{{ branch }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Select Excel File (.xlsx)</label>
+                        <input type="file" name="excel_file" class="form-control"
+                               accept=".xlsx,.xls" required>
+                    </div>
+
+                    <div class="alert alert-warning py-2">
+                        ⚠️ The Excel file can have multiple semesters in one sheet — each row's
+                        Semester column decides where it goes within the selected branch.
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-upload me-2"></i>Upload & Add Subjects
+                    </button>
+                </form>
+            </div>
+        </div>
+        <a href="{{ url_for('manage_subjects') }}" class="btn btn-secondary mt-3 w-100">← Back</a>
+    </div>
+</div>
+{% endblock %}

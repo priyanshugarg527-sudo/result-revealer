@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white"><h5>✏️ Edit Subject</h5></div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Branch</label>
+                        <select name="branch" class="form-select" required>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}"
+                                {{ 'selected' if subject.branch == branch }}>
+                                {{ branch }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subject Name</label>
+                        <input type="text" name="name" class="form-control"
+                               value="{{ subject.name }}" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Semester</label>
+                            <select name="semester" class="form-select" required>
+                                {% for i in range(1, 9) %}
+                                <option value="{{ i }}"
+                                    {{ 'selected' if subject.semester == i }}>
+                                    Semester {{ i }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Credits</label>
+                            <input type="number" name="credits" class="form-control"
+                                   value="{{ subject.credits }}" min="1" max="10" required>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_single_mark"
+                               class="form-check-input" id="singleCheck"
+                               {{ 'checked' if subject.is_single_mark }}
+                               onchange="document.getElementById('normalDiv').style.display = this.checked ? 'none' : 'block';
+                                         document.getElementById('singleDiv').style.display = this.checked ? 'block' : 'none';">
+                        <label class="form-check-label" for="singleCheck">
+                            <strong>Single Mark Subject</strong>
+                            <small class="text-muted">(Project, Seminar, Industrial Training)</small>
+                        </label>
+                    </div>
+
+                    <div id="singleDiv"
+                         style="display:{{ 'block' if subject.is_single_mark else 'none' }};"
+                         class="mb-3">
+                        <label class="form-label">Max Marks</label>
+                        <input type="number" name="single_max" class="form-control"
+                               value="{{ subject.single_max }}" min="1" max="200">
+                    </div>
+
+                    <div id="normalDiv"
+                         style="display:{{ 'none' if subject.is_single_mark else 'block' }};">
+                        <p class="text-muted small mb-2">Marks Distribution</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ESE Max Marks</label>
+                                <input type="number" name="ese_max" id="ese_max"
+                                       class="form-control" value="{{ subject.ese_max }}"
+                                       min="1" max="200" oninput="updateTotal()" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CFA Max Marks</label>
+                                <input type="number" name="cfa_max" id="cfa_max"
+                                       class="form-control" value="{{ subject.cfa_max }}"
+                                       min="0" max="200" oninput="updateTotal()" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="alert alert-info py-2 mb-0">
+                                Total Max Marks:
+                                <strong id="total_display">
+                                    {{ subject.ese_max + subject.cfa_max }}
+                                </strong>
+                                <small class="text-muted ms-2">(ESE + CFA)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning py-2">
+                        ⚠️ Changing marks or credits will update all existing results!
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">💾 Save Changes</button>
+                </form>
+            </div>
+        </div>
+        <a href="{{ url_for('manage_subjects', branch=subject.branch) }}"
+           class="btn btn-secondary mt-3 w-100">← Back</a>
+    </div>
+</div>
+
+<script>
+function updateTotal() {
+    var ese = parseInt(document.getElementById('ese_max').value) || 0;
+    var cfa = parseInt(document.getElementById('cfa_max').value) || 0;
+    document.getElementById('total_display').textContent = ese + cfa;
+}
+</script>
+{% endblock %}

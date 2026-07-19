@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="page-title"><i class="fas fa-redo me-2"></i>All Back Papers</h2>
+    <p class="text-muted">Overview of all pending and completed back papers</p>
+</div>
+
+<!-- Filters -->
+<div class="custom-card p-3 mb-4">
+    <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">All Branches</option>
+                {% for branch in branches %}
+                <option value="{{ branch }}" {{ 'selected' if selected_branch == branch }}>
+                    {{ branch }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Due Semester</label>
+            <select name="sem" class="form-select">
+                <option value="">All Semesters</option>
+                {% for i in range(1, 9) %}
+                <option value="{{ i }}" {{ 'selected' if selected_sem == i }}>Sem {{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All</option>
+                <option value="pending" {{ 'selected' if selected_status == 'pending' }}>Pending</option>
+                <option value="special" {{ 'selected' if selected_status == 'special' }}>Special Back</option>
+                <option value="cleared" {{ 'selected' if selected_status == 'cleared' }}>Cleared</option>
+                <option value="failed" {{ 'selected' if selected_status == 'failed' }}>Failed</option>
+                <option value="absent" {{ 'selected' if selected_status == 'absent' }}>Absent</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-add w-100">
+                <i class="fas fa-filter me-2"></i>Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="custom-card">
+    {% if back_papers %}
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student</th>
+                <th>Branch</th>
+                <th>Subject</th>
+                <th>Failed In</th>
+                <th>Attempt</th>
+                <th>Due Sem</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bp in back_papers %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td>
+                    <strong>{{ bp.student.name }}</strong><br>
+                    <small class="text-muted">{{ bp.student.roll_number }}</small>
+                </td>
+                <td>
+                    <small>{{ bp.student.branch }}</small>
+                </td>
+                <td><strong>{{ bp.subject.name }}</strong></td>
+                <td><span class="sem-badge">Sem {{ bp.original_semester }}</span></td>
+                <td>
+                    {% if bp.attempt_number == 1 %}
+                    <span class="badge bg-warning text-dark">1st Back</span>
+                    {% elif bp.attempt_number == 2 %}
+                    <span class="badge" style="background:#f97316;color:white">2nd Back</span>
+                    {% else %}
+                    <span class="badge bg-danger">Special</span>
+                    {% endif %}
+                </td>
+                <td><span class="sem-badge">Sem {{ bp.due_semester }}</span></td>
+                <td>
+                    {% if bp.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif bp.status == 'cleared' %}
+                    <span class="badge bg-success">Cleared ✓</span>
+                    {% elif bp.status == 'failed' %}
+                    <span class="badge bg-danger">Failed</span>
+                    {% elif bp.status == 'absent' %}
+                    <span class="badge bg-secondary">Absent</span>
+                    {% elif bp.status == 'special' %}
+                    <span class="badge bg-danger">Special Form</span>
+                    {% endif %}
+                </td>
+               <td>
+                    {% if bp.status in ['pending', 'special'] %}
+                    <a href="{{ url_for('upload_back_marks', back_paper_id=bp.id) }}"
+                       class="btn btn-sm btn-action-yellow">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('view_back_papers', student_id=bp.student_id) }}"
+                       class="btn btn-sm btn-action-blue ms-1">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-check-circle"></i>
+        <p>No back papers found for the selected filters.</p>
+    </div>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-back mt-3">
+    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+</a>
+{% endblock %}

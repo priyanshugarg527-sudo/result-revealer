@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white"><h5>➕ Add New Student</h5></div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-2">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Roll Number</label>
+                        <input type="text" name="roll_number" class="form-control" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Branch</label>
+                        <select name="branch" class="form-select" required>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}">{{ branch }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Semester</label>
+                        <select name="semester" class="form-select" required>
+                            {% for i in range(1, 9) %}
+                            <option value="{{ i }}">Semester {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <label class="form-label">Login Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Login Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Add Student</button>
+                </form>
+            </div>
+        </div>
+        <a href="{{ url_for('manage_students') }}"
+           class="btn btn-secondary mt-3 w-100">← Back</a>
+    </div>
+</div>
+{% endblock %}

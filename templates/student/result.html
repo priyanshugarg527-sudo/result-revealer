@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title"><i class="fas fa-clipboard-list me-2"></i>My Result Card</h2>
+        <p class="text-muted mb-0">Semester {{ student.semester }} Result</p>
+    </div>
+    <a href="{{ url_for('download_result', student_id=student.id) }}" class="btn btn-add">
+        <i class="fas fa-download me-2"></i>Download PDF
+    </a>
+</div>
+
+<div class="student-info-card mb-4">
+    <div class="row">
+        <div class="col-md-3 text-center">
+            <div class="student-avatar">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <h3 class="fw-bold mb-1">{{ student.name }}</h3>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-id-card me-1"></i>Roll Number</span>
+                        <span class="info-value">{{ student.roll_number }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-code-branch me-1"></i>Branch</span>
+                        <span class="info-value">{{ student.branch }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-layer-group me-1"></i>Semester</span>
+                        <span class="info-value">Semester {{ student.semester }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+<div class="custom-card">
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Credit</th>
+                <th>ESE</th>
+                <th>CFA</th>
+                <th>Total</th>
+                <th>Point Scale</th>
+                <th>Grade Point</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set ns = namespace(total_credits=0, total_gp=0) %}
+            {% for r in results %}
+            {% if r.subject_ref.is_single_mark %}
+                {% set max_total = r.subject_ref.single_max %}
+            {% else %}
+                {% set max_total = r.subject_ref.ese_max + r.subject_ref.cfa_max %}
+            {% endif %}
+            {% set point_scale = ((r.total_marks / max_total * 10) | round(1)) if max_total and not r.is_absent else 0 %}
+            {% set grade_point = (point_scale * r.subject_ref.credits) | round(1) %}
+            {% set ns.total_credits = ns.total_credits + r.subject_ref.credits %}
+            {% set ns.total_gp = ns.total_gp + grade_point %}
+            <tr>
+                <td><strong>{{ r.subject_ref.name }}</strong></td>
+                <td>{{ r.subject_ref.credits }}</td>
+                {% if r.is_absent %}
+                    <td class="text-danger">Ab</td>
+                    <td class="text-muted">{% if r.subject_ref.is_single_mark %}—{% else %}Ab{% endif %}</td>
+                    <td class="text-danger">Ab</td>
+                {% elif r.subject_ref.is_single_mark %}
+                    <td>{{ r.ese_marks }}/{{ r.subject_ref.single_max }}</td>
+                    <td><span class="text-muted">—</span></td>
+                    <td><strong>{{ r.total_marks }}</strong></td>
+                {% else %}
+                    <td>{{ r.ese_marks }}/{{ r.subject_ref.ese_max }}</td>
+                    <td>{{ r.cfa_marks }}/{{ r.subject_ref.cfa_max }}</td>
+                    <td><strong>{{ r.total_marks }}</strong></td>
+                {% endif %}
+                <td>{{ point_scale }}</td>
+                <td><strong>{{ grade_point }}</strong></td>
+                <td>
+                    <span class="grade-badge grade-{{ r.grade | replace('+','plus') }}">
+                        {{ r.grade }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="6"><strong>TGP / Total Credits : {{ ns.total_credits }}</strong></td>
+                <td><strong>{{ ns.total_gp | round(1) }}</strong></td>
+                <td><strong>GPA: {{ (ns.total_gp / ns.total_credits) | round(2) if ns.total_credits else 0 }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-hourglass-half"></i>
+    <p>No results uploaded yet. Please contact your admin.</p>
+</div>
+{% endif %}
+
+{% if back_papers %}
+<div class="custom-card mt-4">
+    <div class="p-3" style="background:#f8faff; border-bottom:1px solid #e2e8f0;">
+        <h6 class="fw-bold mb-0"><i class="fas fa-redo me-2 text-primary"></i>My Back Papers</h6>
+    </div>
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Failed In</th>
+                <th>Attempt</th>
+                <th>Due Sem</th>
+                <th>Marks</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bp in back_papers %}
+            <tr>
+                <td><strong>{{ bp.subject.name }}</strong></td>
+                <td><span class="sem-badge">Sem {{ bp.original_semester }}</span></td>
+                <td>
+                    {% if bp.attempt_number == 1 %}1st Back
+                    {% elif bp.attempt_number == 2 %}2nd Back
+                    {% else %}Special Back{% endif %}
+                </td>
+                <td><span class="sem-badge">Sem {{ bp.due_semester }}</span></td>
+                <td>{% if bp.total_marks > 0 %}{{ bp.total_marks }}{% else %}—{% endif %}</td>
+                <td>
+                    {% if bp.status == 'cleared' %}
+                    <span class="badge bg-success">Cleared ✅</span>
+                    {% elif bp.status == 'pending' or bp.status == 'special' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif bp.status == 'failed' %}
+                    <span class="badge bg-danger">Failed</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ bp.status|title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title"><i class="fas fa-book-open me-2"></i>Manage Subjects</h2>
+        <p class="text-muted mb-0">{{ subjects|length }} subject(s) found</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('bulk_upload_subjects') }}" class="btn btn-back">
+            <i class="fas fa-file-excel me-2"></i>Bulk Upload
+        </a>
+        <a href="{{ url_for('add_subject', branch=selected_branch) }}" class="btn btn-add">
+            <i class="fas fa-plus me-2"></i>Add Subject
+        </a>
+    </div>
+</div>
+
+<div class="branch-tabs mb-3">
+    {% for branch in branches %}
+    <a href="{{ url_for('manage_subjects', branch=branch) }}"
+       class="branch-tab {% if selected_branch == branch %}active{% endif %}">
+        {% if branch == 'Information Technology' %}
+        <i class="fas fa-laptop-code me-1"></i>
+        {% elif branch == 'Food Technology' %}
+        <i class="fas fa-utensils me-1"></i>
+        {% elif branch == 'Agriculture Engineering' %}
+        <i class="fas fa-seedling me-1"></i>
+        {% elif branch == 'Civil Engineering' %}
+        <i class="fas fa-hard-hat me-1"></i>
+        {% endif %}
+        {{ branch }}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="sem-tabs mb-4">
+    <a href="{{ url_for('manage_subjects', branch=selected_branch) }}"
+       class="sem-tab {% if not selected_sem %}active{% endif %}">All</a>
+    {% for i in range(1, 9) %}
+    <a href="{{ url_for('manage_subjects', branch=selected_branch, sem=i) }}"
+       class="sem-tab {% if selected_sem == i %}active{% endif %}">Sem {{ i }}</a>
+    {% endfor %}
+</div>
+
+<div class="custom-card">
+    {% if subjects %}
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Subject</th>
+                <th>Semester</th>
+                <th>Credits</th>
+                <th>ESE</th>
+                <th>CFA</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td><strong>{{ subject.name }}</strong>
+                    {% if subject.is_single_mark %}
+                    <span class="badge bg-info text-dark ms-1">Single Mark</span>
+                    {% endif %}
+                </td>
+                <td><span class="sem-badge">Sem {{ subject.semester }}</span></td>
+                <td><span class="badge bg-primary">{{ subject.credits }}</span></td>
+                {% if subject.is_single_mark %}
+                <td colspan="2" class="text-center text-muted">— Direct marks only —</td>
+                <td><strong>{{ subject.single_max }}</strong></td>
+                {% else %}
+                <td>{{ subject.ese_max }}</td>
+                <td>{{ subject.cfa_max }}</td>
+                <td><strong>{{ subject.ese_max + subject.cfa_max }}</strong></td>
+                {% endif %}
+                <td>
+                    <a href="{{ url_for('edit_subject', subject_id=subject.id) }}"
+                       class="btn btn-sm btn-action-blue">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('delete_subject', subject_id=subject.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Delete this subject and all its marks?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-action-red ms-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-book"></i>
+        <p>No subjects found. Click "Add Subject" to add subjects for {{ selected_branch }}.</p>
+    </div>
+    {% endif %}
+</div>
+<a href="{{ url_for('dashboard') }}" class="btn btn-back mt-3">
+    <i class="fas fa-arrow-left me-2"></i>Back
+</a>
+{% endblock %}

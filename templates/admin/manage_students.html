@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title"><i class="fas fa-user-graduate me-2"></i>Manage Students</h2>
+        <p class="text-muted mb-0">{{ students|length }} student(s) found</p>
+    </div>
+   <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('promote_all') }}"
+              onsubmit="return confirm('This will promote ALL students. Continue?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-back">
+                <i class="fas fa-forward me-2"></i>Promote All
+            </button>
+        </form>
+        <a href="{{ url_for('bulk_upload_marks') }}" class="btn btn-back"
+           style="background:#d1fae5;color:#059669;border-color:#059669;">
+            <i class="fas fa-file-excel me-2"></i>Bulk Marks
+        </a>
+        <a href="{{ url_for('bulk_upload_students') }}" class="btn btn-back">
+            <i class="fas fa-file-excel me-2"></i>Bulk Students
+        </a>
+        <a href="{{ url_for('add_student') }}" class="btn btn-add">
+            <i class="fas fa-plus me-2"></i>Add Student
+        </a>
+    </div>
+</div>
+
+<div class="branch-tabs mb-3">
+    {% for branch in branches %}
+    <a href="{{ url_for('manage_students', branch=branch) }}"
+       class="branch-tab {% if selected_branch == branch %}active{% endif %}">
+        {% if branch == 'Information Technology' %}
+        <i class="fas fa-laptop-code me-1"></i>
+        {% elif branch == 'Food Technology' %}
+        <i class="fas fa-utensils me-1"></i>
+        {% elif branch == 'Agriculture Engineering' %}
+        <i class="fas fa-seedling me-1"></i>
+        {% elif branch == 'Civil Engineering' %}
+        <i class="fas fa-hard-hat me-1"></i>
+        {% endif %}
+        {{ branch }}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div class="sem-tabs">
+        <a href="{{ url_for('manage_students', branch=selected_branch) }}"
+           class="sem-tab {% if not selected_sem %}active{% endif %}">All</a>
+        {% for i in range(1, 9) %}
+        <a href="{{ url_for('manage_students', branch=selected_branch, sem=i) }}"
+           class="sem-tab {% if selected_sem == i %}active{% endif %}">Sem {{ i }}</a>
+        {% endfor %}
+    </div>
+
+    {% if selected_sem %}
+    <form method="POST"
+          action="{{ url_for('promote_semester', semester=selected_sem) }}"
+          onsubmit="return confirm('{% if selected_sem == 8 %}This will GRADUATE all Semester 8 students of {{ selected_branch }} permanently. Continue?{% else %}Promote all Semester {{ selected_sem }} students of {{ selected_branch }} to Semester {{ selected_sem + 1 }}? Continue?{% endif %}')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="branch" value="{{ selected_branch }}">
+        <button type="submit"
+                class="btn {% if selected_sem == 8 %}btn-action-red{% else %}btn-action-green{% endif %}">
+            {% if selected_sem == 8 %}
+            <i class="fas fa-graduation-cap me-2"></i>Graduate Sem 8
+            {% else %}
+            <i class="fas fa-arrow-up me-2"></i>Promote Sem {{ selected_sem }} → {{ selected_sem + 1 }}
+            {% endif %}
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="custom-card">
+    {% if students %}
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Semester</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td><span class="roll-badge">{{ student.roll_number }}</span></td>
+                <td><strong>{{ student.name }}</strong></td>
+                <td>
+                    <span class="badge"
+                          style="background:
+                          {% if student.branch == 'Information Technology' %}#6366f1
+                          {% elif student.branch == 'Food Technology' %}#f59e0b
+                          {% elif student.branch == 'Agriculture Engineering' %}#059669
+                          {% elif student.branch == 'Civil Engineering' %}#dc2626
+                          {% else %}#6b7280{% endif %}">
+                        {{ student.branch }}
+                    </span>
+                </td>
+                <td><span class="sem-badge">Sem {{ student.semester }}</span></td>
+                <td>
+                    <a href="{{ url_for('upload_marks', student_id=student.id) }}"
+                       class="btn btn-sm btn-action-yellow">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    <a href="{{ url_for('edit_student', student_id=student.id) }}"
+                       class="btn btn-sm btn-action-blue ms-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ url_for('download_result', student_id=student.id) }}"
+                       class="btn btn-sm btn-action-green ms-1">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <a href="{{ url_for('view_back_papers', student_id=student.id) }}"
+                       class="btn btn-sm btn-action-blue ms-1"
+                       title="Back Papers">
+                        <i class="fas fa-redo"></i>
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('delete_student', student_id=student.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Delete {{ student.name }}?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-action-red ms-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-user-slash"></i>
+        <p>No students found for
+            {% if selected_branch %}{{ selected_branch }}{% endif %}
+            {% if selected_sem %}Semester {{ selected_sem }}{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-back mt-3">
+    <i class="fas fa-arrow-left me-2"></i>Back
+</a>
+{% endblock %}

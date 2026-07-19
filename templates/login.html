@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Result Revealer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+
+<!-- Animated Background -->
+<div class="login-bg">
+    <div class="bg-overlay"></div>
+    <div class="animated-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+    </div>
+</div>
+
+<!-- Floating particles -->
+<div class="particles">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+</div>
+
+<div class="login-fullscreen">
+
+    <!-- Left Side -->
+    <div class="login-left">
+        <div class="login-left-inner">
+
+            <!-- Logo -->
+            <div class="brand-logo mb-4">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="brand-name">Result Revealer</h1>
+                    <p class="brand-tagline">Smart Academic Management</p>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <div class="hero-text mb-5">
+                <h2 class="hero-title">Empowering Education<br>Through Technology</h2>
+                <p class="hero-subtitle">
+                    A powerful platform for managing student results, grades, and academic performance — all in one place.
+                </p>
+            </div>
+
+            <!-- Features -->
+            <div class="features-grid">
+                <div class="feature-box">
+                    <div class="feature-icon-wrap bg-purple">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h6>Secure Access</h6>
+                        <small>Role-based login system</small>
+                    </div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon-wrap bg-blue">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div>
+                        <h6>Auto Grades</h6>
+                        <small>Instant grade calculation</small>
+                    </div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon-wrap bg-green">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h6>PDF Reports</h6>
+                        <small>Download result cards</small>
+                    </div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon-wrap bg-orange">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h6>Semester Wise</h6>
+                        <small>Manage all 8 semesters</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Info -->
+            <div class="login-footer-info mt-5">
+                <div class="footer-stat">
+                    <h4>8</h4>
+                    <small>Semesters</small>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-stat">
+                    <h4>100%</h4>
+                    <small>Secure</small>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-stat">
+                    <h4>PDF</h4>
+                    <small>Export Ready</small>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-stat">
+                    <h4>24/7</h4>
+                    <small>Available</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Right Side - Form -->
+    <div class="login-right">
+        <div class="login-form-wrap">
+
+            <div class="form-header text-center mb-5">
+                <div class="welcome-icon mb-3">
+                    <i class="fas fa-lock-open"></i>
+                </div>
+                <h2 class="fw-bold">Welcome Back!</h2>
+                <p class="text-muted">Sign in to access your dashboard</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show rounded-3" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark">Username</label>
+                    <div class="input-group custom-input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user text-primary"></i>
+                        </span>
+                        <input type="text" name="username" class="form-control"
+                               placeholder="Enter your username" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark">Password</label>
+                    <div class="input-group custom-input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-lock text-primary"></i>
+                        </span>
+                        <input type="password" name="password" id="password"
+                               class="form-control" placeholder="Enter your password" required>
+                        <span class="input-group-text toggle-pwd" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login w-100 mb-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard
+                </button>
+
+                <div class="security-note">
+                    <i class="fas fa-shield-alt text-success me-2"></i>
+                    <span>Protected by 256-bit SSL encryption</span>
+                </div>
+            </form>
+
+            <div class="login-bottom-info mt-5">
+                <div class="info-row">
+                    <i class="fas fa-university me-2 text-primary"></i>
+                    <span>Result Revealer — Student Result Management System</span>
+                </div>
+                <div class="info-row mt-2">
+                    <i class="fas fa-code me-2 text-primary"></i>
+                    <span>Built with Flask &bull; SQLite &bull; Bootstrap 5</span>
+                </div>
+                <div class="info-row mt-2">
+                    <i class="fas fa-user-shield me-2 text-primary"></i>
+                    <span>Admin &amp; Student Role Access Control</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePassword() {
+    const pwd = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        pwd.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
+</body>
+</html>

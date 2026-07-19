@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning">
+                <h5>📝 Upload Back Paper Marks</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4 p-3 rounded" style="background:#f8faff; border:1px solid #e2e8f0">
+                    <p class="mb-1"><strong>Student:</strong> {{ bp.student.name }} ({{ bp.student.roll_number }})</p>
+                    <p class="mb-1"><strong>Subject:</strong> {{ subject.name }}</p>
+                    <p class="mb-1"><strong>Original Fail Semester:</strong> Sem {{ bp.original_semester }}</p>
+                    <p class="mb-1"><strong>Failed Component:</strong>
+                        {% if bp.failed_component == 'ese' %}
+                        <span class="badge bg-danger">ESE only</span>
+                        {% elif bp.failed_component == 'cfa' %}
+                        <span class="badge bg-warning text-dark">CFA only</span>
+                        {% else %}
+                        <span class="badge bg-danger">ESE + CFA both</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-1"><strong>Attempt:</strong>
+                        {% if bp.attempt_number == 1 %}
+                        <span class="badge bg-warning text-dark">1st Back Paper</span>
+                        {% elif bp.attempt_number == 2 %}
+                        <span class="badge bg-danger">2nd Back Paper</span>
+                        {% else %}
+                        <span class="badge bg-danger">Special Back Form (Final Chance)</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-0"><strong>Due in:</strong> Semester {{ bp.due_semester }}</p>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    {% if subject.is_single_mark %}
+                    <div class="mb-3">
+                        <label class="form-label">Marks (out of {{ subject.single_max }})</label>
+                        <input type="number" name="single_marks" class="form-control"
+                               min="0" max="{{ subject.single_max }}" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="absent" class="form-check-input" id="absentCheck">
+                        <label class="form-check-label" for="absentCheck">Mark as Absent</label>
+                    </div>
+
+                    {% elif bp.failed_component == 'ese' %}
+                    <!-- Only ESE failed — show only ESE input -->
+                    <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Only <strong>ESE</strong> needs to be cleared.
+                        CFA was already passed — no change needed.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ESE Marks (out of {{ subject.ese_max }})</label>
+                        <input type="number" name="ese_marks" class="form-control"
+                               min="0" max="{{ subject.ese_max }}" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="ese_absent" class="form-check-input" id="eseAbsCheck">
+                        <label class="form-check-label" for="eseAbsCheck">Mark ESE as Absent</label>
+                    </div>
+
+                    {% elif bp.failed_component == 'cfa' %}
+                    <!-- Only CFA failed — show only CFA input -->
+                    <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Only <strong>CFA</strong> needs to be cleared.
+                        ESE was already passed — no change needed.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CFA Marks (out of {{ subject.cfa_max }})</label>
+                        <input type="number" name="cfa_marks" class="form-control"
+                               min="0" max="{{ subject.cfa_max }}" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="cfa_absent" class="form-check-input" id="cfaAbsCheck">
+                        <label class="form-check-label" for="cfaAbsCheck">Mark CFA as Absent</label>
+                    </div>
+
+                    {% else %}
+                    <!-- Both failed — show both inputs -->
+                    <div class="mb-3">
+                        <label class="form-label">ESE Marks (out of {{ subject.ese_max }})</label>
+                        <input type="number" name="ese_marks" class="form-control"
+                               min="0" max="{{ subject.ese_max }}" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="ese_absent" class="form-check-input" id="eseAbsCheck">
+                        <label class="form-check-label" for="eseAbsCheck">Mark ESE as Absent</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CFA Marks (out of {{ subject.cfa_max }})</label>
+                        <input type="number" name="cfa_marks" class="form-control"
+                               min="0" max="{{ subject.cfa_max }}" value="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="cfa_absent" class="form-check-input" id="cfaAbsCheck">
+                        <label class="form-check-label" for="cfaAbsCheck">Mark CFA as Absent</label>
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Minimum pass marks: <strong>35%</strong> in each component.
+                        {% if bp.attempt_number == 3 %}
+                        <br><strong>⚠️ This is the FINAL chance for this subject!</strong>
+                        {% else %}
+                        <br>Remaining chances after this: <strong>{{ 3 - bp.attempt_number }}</strong>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100">💾 Save Back Paper Marks</button>
+                </form>
+            </div>
+        </div>
+        <a href="{{ url_for('view_back_papers', student_id=bp.student_id) }}"
+           class="btn btn-secondary mt-3 w-100">← Back to Back Papers</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title"><i class="fas fa-redo me-2"></i>Back Papers — {{ student.name }}</h2>
+        <p class="text-muted mb-0">Roll No: {{ student.roll_number }} | {{ student.branch }} | Sem {{ student.semester }}</p>
+    </div>
+    <a href="{{ url_for('manage_students') }}" class="btn btn-back">
+        <i class="fas fa-arrow-left me-2"></i>Back
+    </a>
+</div>
+
+{% if back_papers %}
+<div class="custom-card">
+    <table class="table custom-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Subject</th>
+                <th>Failed In</th>
+                <th>Attempt</th>
+                <th>Due Semester</th>
+                <th>Marks</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bp in back_papers %}
+            <tr>
+                <td class="text-muted">{{ loop.index }}</td>
+                <td><strong>{{ bp.subject.name }}</strong></td>
+                <td><span class="sem-badge">Sem {{ bp.original_semester }}</span></td>
+                <td>
+                    {% if bp.attempt_number == 1 %}
+                    <span class="badge bg-warning text-dark">1st Back</span>
+                    {% elif bp.attempt_number == 2 %}
+                    <span class="badge bg-orange text-white" style="background:#f97316">2nd Back</span>
+                    {% else %}
+                    <span class="badge bg-danger">Special Back</span>
+                    {% endif %}
+                </td>
+                <td><span class="sem-badge">Sem {{ bp.due_semester }}</span></td>
+                <td>
+                    {% if bp.total_marks > 0 %}
+                        {{ bp.total_marks }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if bp.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif bp.status == 'cleared' %}
+                    <span class="badge bg-success">Cleared ✓</span>
+                    {% elif bp.status == 'failed' %}
+                    <span class="badge bg-danger">Failed</span>
+                    {% elif bp.status == 'absent' %}
+                    <span class="badge bg-secondary">Absent</span>
+                    {% elif bp.status == 'special' %}
+                    <span class="badge bg-danger">Special Form</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if bp.status in ['pending', 'special'] %}
+                    <a href="{{ url_for('upload_back_marks', back_paper_id=bp.id) }}"
+                       class="btn btn-sm btn-action-yellow">
+                        <i class="fas fa-pen me-1"></i>Upload Marks
+                    </a>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4 p-3 custom-card">
+    <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-2 text-primary"></i>Back Paper Summary</h6>
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="p-3 rounded" style="background:#fef3c7">
+                <h4 class="fw-bold text-warning">{{ back_papers | selectattr('status','equalto','pending') | list | length }}</h4>
+                <small>Pending</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 rounded" style="background:#d1fae5">
+                <h4 class="fw-bold text-success">{{ back_papers | selectattr('status','equalto','cleared') | list | length }}</h4>
+                <small>Cleared</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 rounded" style="background:#fee2e2">
+                <h4 class="fw-bold text-danger">{{ back_papers | selectattr('status','equalto','failed') | list | length }}</h4>
+                <small>Failed</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 rounded" style="background:#fee2e2">
+                <h4 class="fw-bold text-danger">{{ back_papers | selectattr('status','equalto','special') | list | length }}</h4>
+                <small>Special Back</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-check-circle text-success"></i>
+    <p>No back papers! This student has no pending back papers. 🎉</p>
+</div>
+{% endif %}
+{% endblock %}

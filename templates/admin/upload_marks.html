@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card shadow">
+            <div class="card-header bg-warning">
+                <h5>📝 Upload Marks — {{ student.name }} (Sem {{ student.semester }})</h5>
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Subject</th>
+                                <th>ESE Marks</th>
+                                <th>CFA Marks</th>
+                                <th>Absent</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+                            {% for subject in subjects %}
+                            {% set existing = existing_results.get(subject.id) %}
+                            <tr>
+                                <td>
+                                    <strong>{{ subject.name }}</strong><br>
+                                    <small class="text-muted">Credits: {{ subject.credits }} |
+                                    {% if subject.is_single_mark %}
+                                    Single Mark | Max: {{ subject.single_max }}
+                                    {% else %}
+                                    ESE: {{ subject.ese_max }} | CFA: {{ subject.cfa_max }}
+                                    | Total: {{ subject.ese_max + subject.cfa_max }}
+                                    {% endif %}
+                                    </small>
+                                </td>
+
+                                {% if subject.is_single_mark %}
+                                <td>
+                                    <input type="number" name="single_{{ subject.id }}"
+                                           class="form-control" min="0"
+                                           max="{{ subject.single_max }}"
+                                           value="{{ existing.ese_marks if existing else 0 }}"
+                                           placeholder="Marks out of {{ subject.single_max }}">
+                                </td>
+                                <td><span class="text-muted">—</span></td>
+                                <td class="text-center">
+                                    <input type="checkbox" name="absent_{{ subject.id }}"
+                                           class="form-check-input"
+                                           {{ 'checked' if existing and existing.is_absent }}>
+                                </td>
+                                {% else %}
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="number" name="ese_{{ subject.id }}"
+                                               class="form-control" min="0"
+                                               max="{{ subject.ese_max }}"
+                                               value="{{ existing.ese_marks if existing else 0 }}">
+                                        <div class="form-check mb-0 text-nowrap">
+                                            <input type="checkbox"
+                                                   name="ese_absent_{{ subject.id }}"
+                                                   class="form-check-input"
+                                                   id="ese_abs_{{ subject.id }}"
+                                                   {{ 'checked' if existing and existing.ese_absent }}>
+                                            <label class="form-check-label small"
+                                                   for="ese_abs_{{ subject.id }}">Ab</label>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="number" name="cfa_{{ subject.id }}"
+                                               class="form-control" min="0"
+                                               max="{{ subject.cfa_max }}"
+                                               value="{{ existing.cfa_marks if existing else 0 }}">
+                                        <div class="form-check mb-0 text-nowrap">
+                                            <input type="checkbox"
+                                                   name="cfa_absent_{{ subject.id }}"
+                                                   class="form-check-input"
+                                                   id="cfa_abs_{{ subject.id }}"
+                                                   {{ 'checked' if existing and existing.cfa_absent }}>
+                                            <label class="form-check-label small"
+                                                   for="cfa_abs_{{ subject.id }}">Ab</label>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-warning w-100">💾 Save Marks</button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    No subjects found for Semester {{ student.semester }}.
+                    <a href="{{ url_for('add_subject') }}">Add subjects first!</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{{ url_for('manage_students') }}" class="btn btn-secondary mt-3">← Back</a>
+    </div>
+</div>
+{% endblock %}
